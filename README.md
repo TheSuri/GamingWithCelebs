@@ -1,0 +1,2 @@
+# GamingWithCelebs
+Django Marketplace application
