@@ -4,3 +4,4 @@ gamingwithcelebs-06947f5f06d4.json
 functions/util/config.js
 *.xml
 *.iml
+.firebaserc
