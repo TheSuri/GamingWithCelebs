@@ -6,7 +6,7 @@ const FBAuth = require('./util/fbauth');
 
 const { getAllMatchRequests, postMatchRequest } = require('./handlers/matchrequests');
 
-const { signup, login } = require('./handlers/users');
+const { signup, login, uploadImage, addUserDetails } = require('./handlers/users');
 
 
 
@@ -21,6 +21,8 @@ app.post('/matchrequest', FBAuth, postMatchRequest);
 //User routes
 app.post('/signup', signup);
 app.post('/login', login);
+app.post('/user/image', FBAuth, uploadImage);
+app.post('user/', FBAuth, addUserDetails);
 
 
 // https://baseurl.com/api/whateverendpoint
