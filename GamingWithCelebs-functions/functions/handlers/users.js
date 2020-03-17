@@ -1,20 +1,20 @@
 const {admin, db} = require('../util/admin');
 const firebaseConfig = require('../util/config');
 const config = require('../util/config');
-const {validateSignupData, validateLoginData, reduceUserDetails} = require('../util/validators');
-
-
+const {validateSignupData, validateLoginData, validateCelebrityData} = require('../util/validators');
+ 
 
 const firebase = require('firebase');
 firebase.initializeApp(firebaseConfig);
 
 
-exports.signup = (req, res) => {
-    const newUser = {
+exports.signup = (req, res, next) => {
+  const newUser = {
       email: req.body.email,
       password: req.body.password,
       confirmPassword: req.body.confirmPassword,
-      handle: req.body.handle
+      handle: req.body.handle,
+      isCeleb: req.path === '/signupcelebrity'
     };
 
     const { valid, errors } = validateSignupData(newUser);
@@ -25,40 +25,71 @@ exports.signup = (req, res) => {
     let token, userId;
     db.doc(`/users/${newUser.handle}`).get()
     .then(doc => {
-      if(doc.exists){
-        return res.status(400).json({handle: 'this handle is already taken'});
-      } else {
-        return firebase
-        .auth()
-        .createUserWithEmailAndPassword(newUser.email, newUser.password);    
-      }
-    })
-    .then(data => {
-      userId = data.user.uid; 
-      return data.user.getIdToken();
-    })
-    .then((idToken) => {
-      token = idToken;
-      const userCredentials = {
-        handle: newUser.handle,
-        email: newUser.email,
-        created: new Date().toISOString(),
-        imageUrl: `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${noImg}?alt=media`,
-        userId
-      };
-      return db.doc(`/users/${newUser.handle}`).set(userCredentials);
-    })
-    .then(() => {
-      return res.status(201).json({token});
-    })
-    .catch(err => {
-       console.error(err);
-       if (err.code === 'auth/email-already-in-use'){
-         return res.status(400).json({email: 'Email is already in use.'})
-       }
-       return res.status(500).json({error: err.code});
-    })
-}
+    if(doc.exists){
+        res = res.status(400).json({handle: 'this handle is already taken'});
+        return res;
+    } 
+    else {
+      firebase.auth()
+      .createUserWithEmailAndPassword(newUser.email, newUser.password)
+      .then(data => {
+        userId = data.user.uid; 
+        return data.user.getIdToken();    
+      })
+      .then((idToken) => {
+        token = idToken;
+        const userCredentials = {
+          handle: newUser.handle,
+          email: newUser.email,
+          created: new Date().toISOString(),
+          imageUrl: `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${noImg}?alt=media`,
+          isCeleb: newUser.isCeleb,
+          userId
+        };
+        return db.doc(`/users/${newUser.handle}`).set(userCredentials);
+      })
+      .then(() => {
+          req.body.token = token;
+          return next();
+      })
+      .catch(err => {
+        console.error(err);
+        if (err.code === 'auth/email-already-in-use'){
+          return res.status(400).json({email: 'Email is already in use.'})
+        }
+        return res.status(500).json({error: err.code});
+      })
+    }
+    });
+};
+
+
+exports.signupuser = (req, res) => {
+  return res.status(201).json({token: req.body.token});
+};
+
+exports.signupcelebrity = (req, res) => {
+  let celebdeets = {
+    categories: req.body.categories,
+    //Gamelistings will be empty on this route
+    //Will create a new route to add game listings
+    gamelistings: [],
+    matchrequests: [],
+    status: "online"
+  };
+  
+  const { valid, errors } = validateCelebrityData(celebdeets);
+  
+  if(!valid) return res.status(400).json(errors);
+  db.doc(`/celebs/${req.body.handle}`).set(celebdeets)
+  .then(() => {
+    return res.status(201).json({token: req.body.token});
+  })
+  .catch(err => {
+     console.error(err);
+     return res.status(500).json({error: err.code});
+  });
+};
 
 exports.login = (req, res)=> {
     const user = {
@@ -90,11 +121,11 @@ exports.login = (req, res)=> {
 
 //Add user details
 
-exports.addUserDetails = (req, res) => {
-  let userDetails = reduceUserDetails(req.body);
+// exports.addUserDetails = (req, res) => {
+//   let userDetails = reduceUserDetails(req.body);
 
 
-}
+// }
 
 //Upload Image for user
 exports.uploadImage = (req, res) => {

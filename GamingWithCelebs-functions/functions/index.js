@@ -6,8 +6,7 @@ const FBAuth = require('./util/fbauth');
 
 const { getAllMatchRequests, postMatchRequest } = require('./handlers/matchrequests');
 
-const { signup, login, uploadImage, addUserDetails } = require('./handlers/users');
-
+const { signup, signupuser, signupcelebrity, login, uploadImage } = require('./handlers/users');
 
 
 // // Initialize Firebase
@@ -18,11 +17,14 @@ const { signup, login, uploadImage, addUserDetails } = require('./handlers/users
 app.get('/matchrequests', getAllMatchRequests);
 app.post('/matchrequest', FBAuth, postMatchRequest);
 
-//User routes
-app.post('/signup', signup);
+//signup routes
+app.post('/signupuser', signup, signupuser);
+app.post('/signupcelebrity', signup, signupcelebrity);
+
 app.post('/login', login);
 app.post('/user/image', FBAuth, uploadImage);
-app.post('user/', FBAuth, addUserDetails);
+//app.post('user/', FBAuth, addUserDetails);
+
 
 
 // https://baseurl.com/api/whateverendpoint
