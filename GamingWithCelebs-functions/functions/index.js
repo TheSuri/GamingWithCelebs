@@ -2,16 +2,13 @@ const functions = require('firebase-functions');
 // const firebaseConfig = require('./util/config');
 const app = require('express')();
 
-const FBAuth = require('./util/fbauth');
+const {FBAuth, checkCelebrity} = require('./util/middleware');
 
 const { getAllMatchRequests, postMatchRequest } = require('./handlers/matchrequests');
 
 const { signup, signupuser, signupcelebrity, login, uploadImage } = require('./handlers/users');
 
-
-// // Initialize Firebase
-// const firebase = require('firebase');
-// firebase.initializeApp(firebaseConfig);
+const { postGameListing } = require('./handlers/gamelistings');
 
 //MatchRequests routes
 app.get('/matchrequests', getAllMatchRequests);
@@ -25,6 +22,8 @@ app.post('/login', login);
 app.post('/user/image', FBAuth, uploadImage);
 //app.post('user/', FBAuth, addUserDetails);
 
+// Celebrity routes
+app.post('/gamelisting', [FBAuth, checkCelebrity], gamelisting);
 
 
 // https://baseurl.com/api/whateverendpoint

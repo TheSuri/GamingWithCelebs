@@ -1,6 +1,6 @@
 const {admin, db} = require('./admin');
 
-module.exports = (req, res, next) => {
+exports.FBauth = (req, res, next) => {
     let idToken;
     if(req.headers.authorization && req.headers.authorization.startsWith('Bearer ')){
       idToken = req.headers.authorization.split('Bearer ')[1];
@@ -20,7 +20,9 @@ module.exports = (req, res, next) => {
         .get();
     })
     .then(data => {
-      req.user.handle = data.docs[0].data().handle;
+      doc_data = data.docs[0].data()
+      req.user.handle = doc_data.handle;
+      req.user.isCeleb = doc_data.isCeleb;
       return next();
     })
     .catch(err => {
@@ -28,4 +30,10 @@ module.exports = (req, res, next) => {
       return res.status(403).json(err);
     })
 }
+
+exports.checkCelebrity = (req, res, next) => {
+  if (req.isCeleb == false) return res.status(403).json({error: 'User is not a celebrity'});
+  return next();
+}
+
   

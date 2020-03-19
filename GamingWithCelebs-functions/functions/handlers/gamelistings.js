@@ -1,0 +1,3 @@
+exports.gamelisting = (req, res) => {
+    
+}

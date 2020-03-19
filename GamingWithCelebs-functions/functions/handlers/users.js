@@ -50,6 +50,7 @@ exports.signup = (req, res, next) => {
       })
       .then(() => {
           req.body.token = token;
+          req.body.imageUrl = userCredentials.imageUrl;
           return next();
       })
       .catch(err => {
@@ -73,6 +74,7 @@ exports.signupcelebrity = (req, res) => {
     categories: req.body.categories,
     //Gamelistings will be empty on this route
     //Will create a new route to add game listings
+    imageUrl: req.body.imageUrl,
     gamelistings: [],
     matchrequests: [],
     status: "online"
@@ -126,6 +128,37 @@ exports.login = (req, res)=> {
 
 
 // }
+
+
+//get celebs
+exports.getCelebs = (req, res) => {
+  
+}
+
+
+//Get user details
+//Get all the details for a user: 
+//send entire user document in the response
+//If the user is a celebrity also add the celeb document to response
+exports.getAuthenticatedUser = (req, res) => {
+
+}
+
+//get all match requests where this users handle 
+//Matches the "to" field if this user is a celebrity
+//if not a celeb get match requests where this user's 
+//handle is the from field
+exports.getUserMatchRequests = (req, res) => {
+
+}
+
+//Get all game listings for a celeb. 
+//The req should have a celebhandle field in the req.body
+//Get all gamelistings where 
+exports.getGameListings = (req, res) => {
+
+}
+
 
 //Upload Image for user
 exports.uploadImage = (req, res) => {

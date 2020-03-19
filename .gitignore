@@ -5,3 +5,4 @@ functions/util/config.js
 *.xml
 *.iml
 .firebaserc
+misc/
